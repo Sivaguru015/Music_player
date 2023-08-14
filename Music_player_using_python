@@ -1,0 +1,69 @@
+import os
+import tkinter as tk
+from tkinter import filedialog
+import pygame
+
+class MusicPlayerApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Music Player")
+        
+        self.current_song_index = 0
+        self.playing = False
+        
+        self.song_list = []
+        
+        self.setup_ui()
+        self.setup_music()
+
+    def setup_ui(self):
+        self.previous_button = tk.Button(self.root, text="Previous", command=self.play_previous)
+        self.play_button = tk.Button(self.root, text="Play", command=self.play_pause)
+        self.next_button = tk.Button(self.root, text="Next", command=self.play_next)
+        self.open_button = tk.Button(self.root, text="Open Folder", command=self.open_folder)
+        
+        self.previous_button.pack()
+        self.play_button.pack()
+        self.next_button.pack()
+        self.open_button.pack()
+
+    def setup_music(self):
+        pygame.init()
+        pygame.mixer.init()
+
+    def open_folder(self):
+        folder_path = filedialog.askdirectory()
+        self.song_list = [os.path.join(folder_path, filename) for filename in os.listdir(folder_path) if filename.endswith('.mp3')]
+        if self.song_list:
+            self.current_song_index = 0
+            self.play_song()
+    
+    def play_pause(self):
+        if not self.playing:
+            self.playing = True
+            self.play_button.config(text="Pause")
+            pygame.mixer.music.unpause()
+        else:
+            self.playing = False
+            self.play_button.config(text="Play")
+            pygame.mixer.music.pause()
+    
+    def play_previous(self):
+        if self.song_list:
+            self.current_song_index = (self.current_song_index - 1) % len(self.song_list)
+            self.play_song()
+    
+    def play_next(self):
+        if self.song_list:
+            self.current_song_index = (self.current_song_index + 1) % len(self.song_list)
+            self.play_song()
+
+    def play_song(self):
+        if self.song_list:
+            pygame.mixer.music.load(self.song_list[self.current_song_index])
+            pygame.mixer.music.play()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MusicPlayerApp(root)
+    root.mainloop()
